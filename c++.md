@@ -241,7 +241,7 @@ C++中更推荐使用4中强制类型转换关键字：**static_cast，const_cas
 * 编译期和运行期检查类型转换合法性，如static_cast，const_cast和reinterpret_cast是编译期检查，dynamic_cast是运行期检查。
 * 方便后期**重构**时，定位强制转换
 
-```c++
+```cpp
 //1. 初始化转换
 int n = static_cast<int>(3.14);
 vector<int> v = static_cast<vector<int>>(10);
@@ -271,7 +271,7 @@ void *voidp = &e;
 vector<int> *p = static_cast<vector<int> *>(voidp);
 ```
 
-```c++
+```cpp
 int i = 7;
 int *v1 = reinterpret_cast<int *>(7); //整性转指针
 unsigned int *p1 = reinterpret_cast<unsigned int *>(v1); //指针互转
@@ -280,7 +280,7 @@ void (*fp1)() = reinterpret_cast<void(*)()>(f); //函数指针转换，类型不
 reinterpret_cast<unsigned int &>(i) = 42; //创建一个临时引用来赋值
 ```
 
-```c++
+```cpp
 struct V {
   virtual void f(){}
 }
@@ -294,3 +294,72 @@ B &new_b = dynamic_cast<B&>(a); //侧向转型
 ```
 
 ## RTTI
+RTTI是Runtime Type Identification的缩写，意为**运行时类型识别**。
+C++主要为下列两个操作，提供RTTI，
+* typeid运算符，返回表达式或类型名的**实际类型**，即const type_info struct。
+    * **静态类型**，在**编译期推导出类型信息**
+        * 类型名
+        * 内置类型变量，如int，char等
+        * 实例化对象
+        * 指向**不含virtual的类对象指针的解引用**，或**不含virtual类对象的引用**
+    * **动态类型**
+        * 指向含有virtual的类对象的指针的解引用，或含有virtual类对象的引用
+* dynamic_cast运算符，用于**多态指针或引用**安全的向下类型转换。
+    * 使用虚表vtable中type_info指针，找到类类型信息
+    * 在多重继承或虚拟继承中，类对象包含多个虚表指针，分别指向基类和子类的虚函数入口，但他们对应的type_info指针是相同的。这保证了该类的任意一个基类指针或引用指向派生类时，type_info是相同的。因此向下转型只需比较两者的type_info信息是否相同（operator==或operator!=）。
+```cpp
+class type_info{
+public:
+    virtual ~type_info();
+    bool operator==(const type_info&) const;//type_info比较
+    bool operator!=(const type_info&) const;
+    bool before(const type_info&) const;
+    const char* name() const;
+private://non-copyable
+    type_info(const type_info&);
+    type_info operator=(const type_info&);
+    //data members
+};
+```
+
+```cpp
+class X {
+public:
+    virtual ~X(){};
+};
+class XX : public X {};
+class Y{};
+int n = 0;
+XX xx;
+Y y;
+Y *py = &y;
+cout << typeid(int).name() << endl; //i
+cout << typeid(XX).name() << endl;  //2XX
+cout << typeid(n).name() << endl;   //i
+cout << typeid(xx).name() << endl;  //2XX
+cout << typeid(py).name() << endl;  //P1Y
+cout << typeid(*py).name() << endl; //1Y，内部符号，不易读
+```
+
+```cpp
+X *px = new XX();
+cout << typeid(px).name() << endl;  //P1X
+cout << typeid(*px).name() << endl; //2XX
+ ```
+
+## 智能指针
+
+## 构造函数与析构函数
+* 构造函数和析构函数为什么不能调用虚函数？
+* 基类析构函数为什么声明为virtual？
+## 虚函数与虚表
+## 多态
+## 重载
+## 重写
+## class与struct
+## 右值与右值引用
+## 序列式容器
+## 关联式容器
+## 无序容器
+## 适配器
+
