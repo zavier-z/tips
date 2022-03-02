@@ -331,3 +331,50 @@ int backPackIII(vector<int> &A, vector<int> &V, int m) {
     return ans;
 }
 ```
+
+### [背包问题IV](https://www.lintcode.com/problem/562/)
+> 给出 n 个物品, 以及一个数组, `nums[i]`代表第`i`个物品的大小, 保证大小均为正数并且没有重复, 正整数 `target` 表示背包的大小, 找到能填满背包的方案数。 `每一个物品可以使用无数次`
+
+* 解题思路
+    * 完全背包问题与爬楼梯问题结合，迭代式：f(i)(j) = f(i-1)(j) + sum(f(i-1)(j-kA[i-1]))
+    * 其中k使得j-kA[i-1]>=0即符合条件。优化后迭代式为：f(i)(j)=f(i-1)(j)+f(i)(j-A[i-1])
+    * 和完全背包思路相似，f(i)(j-A[i-1])表示可以取当前迭代f(i)的值，即使用A[i-1]多次
+
+```cpp
+int backPackIV(vector<int> &nums, int target) {
+    int m = target, n = nums.size();
+    vector<vector<int>> dp(n+1, vector<int>(m+1, 0));
+    dp[0][0] = 1;
+
+    for(int i=1; i<=n; ++i) {
+        for(int j=0; j<=m; ++j) {
+            dp[i][j] = dp[i-1][j];
+
+             if(j >= nums[i-1]) {
+                dp[i][j] += dp[i][j-nums[i-1]];
+             }
+        }
+    }
+
+    return dp[n][target];
+}
+```
+
+* 优化
+    * 用滚动数组优化的迭代式：f(j)=f(j) + f(j-A[i-1])
+
+```cpp
+int backPackIV(vector<int> &nums, int target) {
+    int m = target, n = nums.size();
+    vector<int> dp(m+1, 0);
+    dp[0] = 1;
+
+    for(int i=1; i<=n; ++i) {
+        for(int j=nums[i-1]; j<=m; ++j) {
+            dp[j] += dp[j-nums[i-1]];
+        }
+    }
+
+    return dp[target];
+}
+```
