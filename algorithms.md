@@ -588,7 +588,7 @@ vector<vector<int>> Mine_sweeping(vector<vector<int>> &map, vector<int> &start) 
     * 补给站在x移动，可以看出两侧最大值最大，中间最大值较小。这是一个凹函数。
     * 搜索解时，我们取1/2，和3/4，进行比较，为了保证精度，我们只搜索100次。
 
- ```cpp
+```cpp
 double check(double x, vector<vector<int>>& nums) {
     double maxd = 0;
     int n = nums.size();
