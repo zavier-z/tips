@@ -758,3 +758,142 @@ vector<vector<int>> fourSum(vector<int> &nums, int target) {
     return res;
 }
 ```
+
+### 快速排序
+每趟排序时，将序列分区为前后两部分，使得前半部分记录比后半部分都小，然后递归对两部分进行快排。
+
+快速排序最好、平均时间复杂度O(nlog(n)), 最坏时间复杂度O(n^2)
+快速排序算法的空间复杂度根据递归深度而变化，它采用分治算法，递归对每个区间进行分区处理，辅助空间复杂度为O(log(n) ~ n)。
+
+执行partition时，使用首尾指针交换，它无法保证等值的相对位置，因此是一种不稳定算法。
+
+快速排序运行时间和划分是否对称有关。每次划分的两个区域包含n-1和1个元素，最差时间复杂度为O(n^2)；每次划分基准刚好为中值时，时间复杂度最好，为O(nlogn)。所以优化快排，选取基准非常重要。
+* 固定基准，如以区间第一个元素为基准分区，对于随机性输入友好，但对于基本有序的输入，时间复杂度高
+* 随机基准，对于基本有序的输入，平均的性能也不错，可以避免最坏时间复杂度。
+* 三数取中，比较数组头、中、尾，选择中值作为基准。效率和随机基准差不多，能更好适应基本有序的输入
+* 当分区序列长度已经足够小时（5～20），使用插入排序，此时快排效率不高。
+* 尾递归优化，当函数递归调用都出现在函数末尾，且返回值不作其他运算时，就是尾递归。编译期将覆盖当前的栈，而不会创建新的栈。这可以缩减栈的递归深度，提高执行效率。
+* 多线程，按照固定数量划分区间，每个区间创建一个线程，并使用快排，最后多路并归为一个有序序列。
+
+```cpp
+int partition(vector<int>& arr, int start, int end) {
+    int left = start, right = end;
+    int base = arr[start];
+    while(left < right) {
+        while(left < right && arr[right] >= base) --right;
+        while(left < right && arr[left] <= base) ++left;
+
+        if(left < right) {
+            swap(arr[left], arr[right]);
+        }
+    }
+
+    arr[start] = arr[left];
+    arr[left] = base;
+    return left;
+}
+
+void quickSort(vector<int>& arr, int start, int end) {
+    if(start >= end) return;
+
+    int idx = partition(arr, start, end);
+    quickSort(arr, start, idx);
+    quickSort(arr, idx+1, end);
+}
+```
+
+
+### 归并排序
+给定一组记录，首先将相邻元素进行归并，得到n/2个子序列，然后再将相邻的两个子序列归并，得到n/4个有序子序列，反复此过程，直到全局有序。
+
+归并排序的最坏、平均、最好时间复杂度O(nlogn)，空间复杂度O(n)。
+
+```cpp
+void merge(vector<int>& arr, vector<int>& tmp, int start, int mid, int end) {
+    int index = 0;
+    int left = start, right = mid+1;
+    while(left <= mid && right <= end) {
+        tmp[index++] = arr[left] >= arr[right] ? arr[right++] : arr[left++];
+    }
+
+    while(left <= mid) {
+        tmp[index++] = arr[left++];
+    }
+
+    while(right <= end) {
+        tmp[index++] = arr[right++];
+    }
+
+    for(int i=start; i<=end; ++i) {
+        arr[i] = tmp[i-start];
+    }
+}
+
+void mergeSort(vector<int>& arr, vector<int>& tmp, int start, int end) {
+    if(start >= end) return;
+
+    int mid = start + (end-start)/2;
+    mergeSort(arr, tmp, start, mid);
+    mergeSort(arr, tmp, mid+1, end);
+    merge(arr, tmp, start, mid, end);
+}
+
+void sortIntegers2(vector<int>& arr) {
+    vector<int> tmp; tmp.reserve(arr.size());
+    mergeSort(arr, tmp, 0, arr.size()-1);
+}
+```
+
+### 堆排序
+用数组结构，将序列构造成一颗完全二叉树。把这颗完全二叉树从数组尾向前调整为最小堆或最大堆。如果是最小堆，则根节点最小。每次将根节点与数组尾元素交换，重新调整0～n-1为最小堆，输出次小值。重复上诉过程，知道输出所有节点。最终得到一个降序序列。
+
+堆排序的最好、平均，最坏的情况均是O(nlogn)，空间复杂度为O(1)。
+但由于树结构左右孩子和父亲的调整，不会保持相同值的相对位置，所以堆排序是不稳定的。
+
+```cpp
+void adjustHeap(vector<int>& arr, int end, int idx) {
+    int maxId = idx;
+    int left = 2*idx+1;;
+    int right = left + 1;
+
+    if(left<end && arr[maxId]<arr[left]) maxId = left;
+    if(right<end && arr[maxId]<arr[right]) maxId = right;
+
+    if(maxId != idx) {
+        swap(arr[maxId], arr[idx]);
+        adjustHeap(arr, end, maxId); // 可能导致孩子不是最大堆，继续调整
+    }
+}
+
+void heapSort(vector<int>& arr, int end) {
+    for(int i=end/2-1; i>=0; --i) {
+        adjustHeap(arr, end, i);
+    }
+
+    for(int i=end-1; i>=1; --i) {
+        swap(arr[0], arr[i]);
+        adjustHeap(arr, i, 0);
+    }
+}
+```
+
+### 插入排序
+将序列分为有序部分，和无序部分。初始有序部分长度为1，然后依次将无序元素插入有序序列。
+直到将所有无序元素插入，得到完整的有序序列。
+
+最好时间复杂度O(n)，平均时间复杂度为O(n^2)。对于基本有序序列，较为高效。
+
+```cpp
+void insertSort(vector<int>& arr) {
+    for(int i=1; i<arr.size(); ++i) {
+        int j=i-1, value = arr[i];
+        while(j>=0 && arr[j]>value) {
+            arr[j+1] = arr[j];
+            --j;
+        }
+
+        arr[j+1] = value;
+    }
+}
+```
+
