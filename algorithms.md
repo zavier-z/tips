@@ -153,6 +153,39 @@ bool isValid(string s) {
 
 ```
 
+### [移掉k个数字](https://leetcode-cn.com/problems/remove-k-digits/)
+> 给你一个以字符串表示的非负整数 `num` 和一个整数 `k` ，移除这个数中的 `k`位数字，使得剩下的数字最小。请你以字符串形式返回这个最小的数字。
+
+* 解题思路
+    * 移除数字时，需要保持数字的相对位置，这里可以猜测使用队列，栈之类的结构。
+    * 同时，需要使得剩下的数字保持最小，那么可以想到单调栈
+
+```cpp
+string removeKdigits(string num, int k) {
+    vector<char> st;
+    for(auto n : num) {
+        while(!st.empty() && st.back() > n && k) {
+            st.pop_back();
+            --k;
+        }
+        st.push_back(n);
+    }
+
+    for(; k>0; --k) {
+        st.pop_back();
+    }
+
+    string ans = "";
+    bool isLeadingZero = true;
+    for(auto n : st) {
+        if(isLeadingZero && n == '0') continue;
+        isLeadingZero = false;
+        ans += n;
+    }
+    return ans == "" ? "0" : ans;
+}
+```
+
 ### 背包问题
 > 在`n`个物品中挑选若干物品装入背包，最多能装多满？假设背包的大小为`m`，每个物品的大小为A(i)
 
@@ -897,3 +930,51 @@ void insertSort(vector<int>& arr) {
 }
 ```
 
+### 环形链表
+```cpp
+bool hasCycle(ListNode *head) {
+  if(!head || !head->next) return false;
+  ListNode *fast = head->next, *slow = head;
+  while(fast != slow) {
+    if(!fast || !fast->next) return false; //fast先为空，表示无环
+    fast = fast->next->next;
+    slow = slow->next;
+  }
+  return true; //fast==slow表示有环
+}
+```
+
+### 链表环入口结点
+```cpp
+ListNode *detectCycle(ListNode *head) {
+    if(!head) return   nullptr;
+
+    ListNode* fast = head, *slow = head;
+    while(fast && fast->next) {
+        fast = fast->next->next;
+        slow = slow = slow->next;
+        if(fast == slow) break;
+    }
+
+    if(fast == nullptr || fast->next == nullptr) return   nullptr;
+
+    fast = head;
+    while(fast != slow) {
+        fast = fast->next;
+        slow = slow->next;
+    }
+
+    return fast;
+}
+```
+
+### 两个链表的第一个公共节点
+```cpp
+ListNode *p1 = pHead1;
+ListNode *p2 = pHead2;
+while(p1 != p2) {
+  p1 = p1?p1->next:pHead2;
+  p2 = p2?p2->next:pHead1;
+}
+return p1;
+```

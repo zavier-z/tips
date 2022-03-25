@@ -1,6 +1,6 @@
 ### 以太网头
 以太网格式帧：
-![mac frame](https://akaedu.github.io/book/images/tcpip.ethernetformat.png)
+![mac frame](http://akaedu.github.io/book/images/tcpip.ethernetformat.png)
 
 7字节的前导码用来做同步，典型值为0xAA，0101的序列。SFD为帧的起始定界符，固定值为0xAB。
 目的MAC地址和源MAC地址，都是6字节，以外网帧的目的地址允许寻址到多个站点（广播和组播）。
@@ -47,7 +47,7 @@ TCP至少包含20字节。分别是2字节的源端口，2字节目的端口，4
 紧急数据被接收时，立即触发SIGURG信号，在信号处理函数中使用MSG_OOB标志recv就可以获取带外数据。
 
 ### ICMP头
-![imcp header](https://img-blog.csdn.net/20170513005317177)
+![imcp header](http://img-blog.csdn.net/20170513005317177 "imcp header")
 
 ICMP（Internet Control Message Protocol）因特网控制报文协议。它是IPv4协议族中的一个子协议，用于IP主机、路由器之间传递控制消息。控制消息是在网络通不通、主机是否可达、路由是否可用等网络本身的消息。
 
@@ -121,7 +121,7 @@ traceroute操作IP头TTL字段，从1开始递增。这使得从源IP到目的IP
 * 非阻塞IO
 陷入内核没有数据，或者操作失败直接返回。
 
-![non-block io](https://upload-images.jianshu.io/upload_images/9795603-35c4a25b6e395081.png)
+![non-block io](http://upload-images.jianshu.io/upload_images/9795603-35c4a25b6e395081.png)
 
 * IO多路复用
 会阻塞在select、poll和epoll。
@@ -131,12 +131,12 @@ traceroute操作IP头TTL字段，从1开始递增。这使得从源IP到目的IP
 * SIGIO
 通过SIGIO信号来通知I/O事件，但是SIGIO不会阻塞应用程序。需要在信号处理函数中，完成读写操作。
 
-![sigio](https://upload-images.jianshu.io/upload_images/9795603-a0fe92736a8c146a.png)
+![sigio](http://upload-images.jianshu.io/upload_images/9795603-a0fe92736a8c146a.png)
 
 * 异步IO
 POSIX规范定义了一组异步操作IO的接口，不用关心fd是阻塞还是非阻塞，异步IO是由内核接管应用层对fd的IO操作。异步IO向应用层通知IO操作完成事件。真正做到非阻塞读写，所有读写由内核完成。
 
-![async io](https://upload-images.jianshu.io/upload_images/9795603-70537c4ff58467a6.png)
+![async io](http://upload-images.jianshu.io/upload_images/9795603-70537c4ff58467a6.png)
 
 
 ### socket backlog
@@ -157,7 +157,7 @@ C端收到带SYN+ACK的包，回一个ACK=y+1的应答；此时C端进入ESTABLI
 
 S端收到应答，也进入ESTABLISH状态。
 
-![three-way handshaking](https://images2015.cnblogs.com/blog/816045/201611/816045-20161105220355065-482198403.png)
+![three-way handshaking](http://images2015.cnblogs.com/blog/816045/201611/816045-20161105220355065-482198403.png)
 
 * 为什么需要三次握手？
 为实现可靠的数据传输，TCP协议通信双方，都必须维护一个序列号，标识发送的包中哪些是被对方确认的。所以三次握手过程是通知对方自己的初始序列号，并双方都确认了。
@@ -338,6 +338,9 @@ HTTPS加密传输前，需要先验证服务端身份，然后交换通信密钥
 这里面利用了非对称加密RSA进行密钥交换，并利用CA签名的证书保证公钥的可信的。然后利用对称加密进行数据传输，解决数据传输的效率问题。
 
 ![keygen](https://img.halfrost.com/Blog/ArticleImage/121_3_0.png)
+
+主密钥（MasterSecret）将两个随机数和预主密钥送入随机函数PRF生成主密钥；
+会话密钥（SessionKey）是两个随机数和主密钥送入PRF生成。
 
 
 ### 服务器链接上限
